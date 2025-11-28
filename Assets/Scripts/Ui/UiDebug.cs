@@ -7,6 +7,11 @@ using UnityEngine.Rendering;
 
 public class UiDebug : MonoBehaviour
 {
+    [Header("WaveInfo")]
+    public TextMeshProUGUI leveltxt;
+    public TextMeshProUGUI statMultitxt;
+    public TextMeshProUGUI cdMultitxt;
+
     [Header("ComboInfo")]
     public ComboManager comboManager;
     public GameObject debugUI;
@@ -17,8 +22,13 @@ public class UiDebug : MonoBehaviour
 
     [Header("PlayerStats")]
     public GameObject player;
+    private PlayerStats stats;
     public TextMeshProUGUI currentHealthtxt;
     public TextMeshProUGUI maxHealthtxt;
+    void Start()
+    {
+       stats = player.GetComponent<PlayerStats>();
+    }
     void Update()
     {
         
@@ -32,6 +42,7 @@ public class UiDebug : MonoBehaviour
             debugUI.SetActive(true);
             UpdateComboText();
             UpdateCooldownsText();
+            UpdateWaveInfo();
         }
     }
     void UpdateComboText()
@@ -128,10 +139,18 @@ public class UiDebug : MonoBehaviour
     {
         if(player !=null)
         {
-            maxHealthtxt.text = "Max: "+player.GetComponent<PlayerHealth>().maxHealth.ToString();
-            currentHealthtxt.text = "Current: "+player.GetComponent<PlayerHealth>().currentHealthPlayer.ToString();
+            if(stats!=null)
+            {
+                maxHealthtxt.text = "Max: "+stats.maxHealth.ToString();
+                currentHealthtxt.text = "Current: "+stats.currentHealth.ToString();
+            }
         }
-        
     }
-
+    void UpdateWaveInfo()
+    {
+        EnemySpawner enemySpawner = GameObject.FindWithTag("EnemySpawner").GetComponent<EnemySpawner>();
+        leveltxt.text = "Wave: "+ enemySpawner.WaveLevelUI;
+        statMultitxt.text = "Stat Multiplier: "+ enemySpawner.StatMultiplierUI;
+        cdMultitxt.text = "CooldownMulti: "+ enemySpawner.CooldownMultiplierUI;
+    }
 }

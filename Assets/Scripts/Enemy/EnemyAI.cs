@@ -3,18 +3,22 @@ using UnityEngine;
 
 public class EnemyAI : MonoBehaviour
 {
-    public float moveSpeed;
+    [Header("Status")]
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private int damage;
+    [SerializeField] private float exp;
     public Transform target;
+    public GameObject player;
     private Rigidbody2D rb;
     private Vector2 normalizedDirection;
-    public int damage;
     private bool isKnockedBack = false;
     private SpriteRenderer spriteRenderer;
     private Animator animator;
-    public void Initialize(EnemyData data)
+    public void Initialize(EnemyData data, float statMultiplier)
     {
-        this.moveSpeed = data.moveSpeed;
-        this.damage = data.damage;
+        this.moveSpeed = data.moveSpeed* statMultiplier;
+        this.damage = (int)(data.damage*statMultiplier);
+        this.exp = (float)(data.exp*statMultiplier);
     }
     void Awake()
     {
@@ -24,7 +28,8 @@ public class EnemyAI : MonoBehaviour
     }
     void Start()
     {
-        target = GameObject.FindWithTag("Player").transform;
+        player = GameObject.FindWithTag("Player");
+        target = player.transform;
 
         //adicionando o inimigo no array de inimigos no mapa para definir qual inimigo será alvo do player
         EnemyManager.allEnemies.Add(this);
@@ -86,6 +91,11 @@ public class EnemyAI : MonoBehaviour
     void OnDestroy()
     {
         EnemyManager.allEnemies.Remove(this);
+        PlayerExp playerExp = player.GetComponent<PlayerExp>();
+        if (playerExp != null)
+        {
+            playerExp.AddExp(this.exp); 
+        }
     }
 
 
