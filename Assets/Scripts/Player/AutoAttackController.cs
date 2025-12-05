@@ -10,6 +10,8 @@ public class AutoAttackController : MonoBehaviour
     [SerializeField] private bool isShooting = true;
     public float coolDownShoot;
     public Vector2 directionNormalized;
+    public int attackDamage;
+    public float attackSpeed;
     void Start()
     {
         StartCoroutine(FireRoutine());
@@ -41,7 +43,13 @@ public class AutoAttackController : MonoBehaviour
                 Vector2 direction = closestEnemy.transform.position - transform.position;
                 directionNormalized = direction.normalized;
                 
-                newProjectile.GetComponent<ProjectileMovement>().Setup(directionNormalized);
+                newProjectile.GetComponent<ProjectileMovement>().Setup(
+                    directionNormalized, 
+                    attackSpeed, 
+                    attackDamage, 
+                    0, 
+                    0f
+                );
             }
             yield return new WaitForSeconds(coolDownShoot);
         }

@@ -48,7 +48,6 @@ public class SkillHUD : MonoBehaviour
                     skills[i].currentCooldown = 0;
             }
 
-            // Detecta input da skill
             if (Input.GetKeyDown(skills[i].keyBind) && !skills[i].IsOnCooldown())
             {
                 UseSkill(i);
@@ -67,11 +66,5 @@ public class SkillHUD : MonoBehaviour
     void UseSkill(int index)
     {
         skills[index].currentCooldown = skills[index].cooldown;
-
-        // Aqui você adiciona a lógica da skill
-        Debug.Log($"Skill {skills[index].skillName} usada!");
-
-        // Exemplo: chamar um evento ou método do player
-        // PlayerController.instance.CastSkill(index);
     }
 }

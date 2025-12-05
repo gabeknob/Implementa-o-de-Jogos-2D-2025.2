@@ -2,34 +2,92 @@ using UnityEngine;
 
 public class ProjectileMovement : MonoBehaviour
 {
+    private float speed;
+    private int damage;
+    
+    // Variáveis de comportamento
+    private int bouncesRemaining;
+    private float bounceRange;
+
     private Vector2 moveDirection;
-    [SerializeField] private float speed;
-    private Rigidbody2D rb;
+    private bool isSetup = false;
 
-    public int damage = 100;
-    public void Setup(Vector2 direction)
+    public void Setup(Vector2 dir, float spd, int dmg, int bounces, float range)
     {
-        moveDirection = direction;
-    }
-    void Awake()
-    {
-        rb = GetComponent<Rigidbody2D>();
-    }
-    void FixedUpdate()
-    {
-        rb.linearVelocity = moveDirection * speed;
+        speed = spd;
+        damage = dmg;
+        bouncesRemaining = bounces;
+        bounceRange = range;
+
+        moveDirection = dir;
+
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0, 0, angle+90f);
+
+        isSetup = true;
+        Destroy(gameObject, 5f);
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    void Update()
     {
-        if(collision.CompareTag("Enemy"))
+        if (!isSetup) return;
+
+        transform.position += (Vector3)moveDirection * speed * Time.deltaTime;
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Enemy"))
         {
-            EnemyHealth enemyHealth = collision.GetComponent<EnemyHealth>();
-            if (enemyHealth != null)
+            EnemyHealth enemy = other.GetComponent<EnemyHealth>();
+            if(enemy != null)
             {
-                enemyHealth.TakeDamage(damage);
+                enemy.TakeDamage(damage);
             }
-            Destroy(this.gameObject);
+
+            //Lógica de Ricochete vs Destruição 
+            if (bouncesRemaining > 0)
+            {
+                HandleBounce(other.transform.position, other.gameObject);
+            }
+            else
+            {
+                Destroy(gameObject); // Comportamento Fogo
+            }
+        }
+    }
+
+    void HandleBounce(Vector2 hitPosition, GameObject currentTarget)
+    {
+        bouncesRemaining--;
+
+        Collider2D[] hits = Physics2D.OverlapCircleAll(hitPosition, bounceRange);
+        Transform bestTarget = null;
+        float closestDist = Mathf.Infinity;
+
+        foreach (var hit in hits)
+        {
+            if (hit.CompareTag("Enemy") && hit.gameObject != currentTarget)
+            {
+                float dist = Vector2.Distance(hitPosition, hit.transform.position);
+                if (dist < closestDist)
+                {
+                    closestDist = dist;
+                    bestTarget = hit.transform;
+                }
+            }
+        }
+
+        if (bestTarget != null)
+        {
+            moveDirection = (bestTarget.position - transform.position).normalized;
+            
+            float angle = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(0, 0, angle + 90f);
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
 }

@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 104504fa9767fe143be3e859fb89a53d, type: 3}
   m_Name: Lightning
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
-  key1: Air
+  skillName: Lightning
   effectPrefab: {fileID: 4195311821623240294, guid: 1772a6913bdc24cc6b0a36452b5dc634, type: 3}
-  coolDown: 0
+  cooldown: 0
+  maxCharges: 0
   damage: 10
   bounceCount: 3
   bounceRange: 5
