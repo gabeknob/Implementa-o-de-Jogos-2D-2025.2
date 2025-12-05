@@ -1149,22 +1149,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SkillHUD
   skills:
   - skillName: Thunder
-    skillIcon: {fileID: -6985594235076475731, guid: 1dccc6489e58d3f4d80c5e5f52102c9d, type: 3}
+    skillIcon: {fileID: -2615981626919160109, guid: cc9ba4d6f1426e94d9eeb0f0428ff067, type: 3}
     keyBind: 113
     cooldown: 5
     currentCooldown: 0
   - skillName: Nature
-    skillIcon: {fileID: 328862580700138579, guid: 1dccc6489e58d3f4d80c5e5f52102c9d, type: 3}
+    skillIcon: {fileID: 5811434152844783493, guid: e423e6eabff5a1b4cbcc43a52cc1fab1, type: 3}
     keyBind: 119
     cooldown: 3
     currentCooldown: 0
   - skillName: Dark
-    skillIcon: {fileID: -7300234060552522799, guid: 1dccc6489e58d3f4d80c5e5f52102c9d, type: 3}
+    skillIcon: {fileID: 7038364826739152932, guid: 8eb7b3040d4f4f44ba9956ba9eb5168b, type: 3}
     keyBind: 101
     cooldown: 7
     currentCooldown: 0
   - skillName: Light
-    skillIcon: {fileID: 6873378982445964932, guid: 1dccc6489e58d3f4d80c5e5f52102c9d, type: 3}
+    skillIcon: {fileID: 6574870644299172810, guid: 9a2bf68c19e127549b3e282c293dabfa, type: 3}
     keyBind: 114
     cooldown: 6
     currentCooldown: 0
