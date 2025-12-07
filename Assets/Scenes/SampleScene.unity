@@ -2742,7 +2742,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetMarker: {fileID: 1173541351}
-  markerStopDistance: 0.1
+  terminalVelocity: 3
+  slowingRadius: 1
+  stopDistance: 0.1
+  acceleration: 40
+  deceleration: 50
 --- !u!61 &506964553
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2847,6 +2851,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   gameOverScreen: {fileID: 1916308842}
+  healthBar: {fileID: 535286808}
+  flashMaterial: {fileID: 2100000, guid: 5f3e8f54dadee434083d2b3735115fe6, type: 2}
+  hitStopDuration: 0.15
   iFrameDuration: 1
   numberOfFlashes: 5
   knockbackForce: 5
@@ -2883,7 +2890,7 @@ MonoBehaviour:
   healthBar: {fileID: 535286808}
   maxHealth: 100
   currentHealth: 0
-  moveSpeed: 6
+  moveSpeed: 3
   globalDamageMultiplier: 1
   cooldownReductionMultiplier: 1
 --- !u!114 &506964560

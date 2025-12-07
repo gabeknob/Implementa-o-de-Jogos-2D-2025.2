@@ -3,43 +3,125 @@ using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour
 {
-    // Referências existentes
+    // --- REFERÊNCIAS ---
     private PlayerStats stats;
+    private SpriteRenderer spriteRenderer;
     public GameObject gameOverScreen;
-    private SpriteRenderer spriteRenderer; 
+    
+    [Header("Interface (UI)")]
+    public HealthBar healthBar; // <--- ARRASTE A BARRA DE VIDA AQUI NO INSPECTOR
 
-    [Header("Configurações de Invulnerabilidade")]
+    // --- CONFIGURAÇÕES DE IMPACTO ---
+    [Header("Efeitos Visuais")]
+    public Material flashMaterial; 
+    private Material originalMaterial; 
+
+    [Tooltip("Tempo congelado (Hit Stop)")]
+    public float hitStopDuration = 0.15f; 
+
+    // --- CONFIGURAÇÕES DE DEFESA ---
+    [Header("Invulnerabilidade")]
     public float iFrameDuration = 1.0f; 
-    public int numberOfFlashes = 5;      
-    private bool isInvulnerable = false;
+    public int numberOfFlashes = 5;     
+    private bool isInvulnerable = false; 
 
-    [Header("Configurações de Knockback")]
-    public float knockbackForce = 5f; 
+    [Header("Knockback")]
+    public float knockbackForce = 10f; 
     public float knockbackRadius = 3f; 
+
     void Awake()
     {
         stats = GetComponent<PlayerStats>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        originalMaterial = spriteRenderer.material;
+    }
+
+    void Start()
+    {
+        // Garante que a barra de vida comece sincronizada com o status atual do player
+        if (healthBar != null)
+        {
+            healthBar.SetMaxHealth(stats.maxHealth, false);
+            healthBar.SetHealth(stats.currentHealth);
+        }
     }
 
     public void TakeDamage(int damage)
     {
         if (isInvulnerable) return;
 
-        // Passa a responsabilidade da matemática para o Stats
-        // Passamos valor negativo pois é dano
-        if(stats != null) stats.ModifyHealth(-damage);
+        stats.currentHealth -= damage;
+        
+        // --- ATUALIZAÇÃO DA UI ---
+        if (healthBar != null)
+        {
+            healthBar.TakeDamage(damage); // Usa o método da própria barra para animar
+            // OU: healthBar.SetHealth(stats.currentHealth); // Se preferir setar direto
+        }
 
+        if (stats.currentHealth <= 0)
+        {
+            PlayerDeath();
+            return;
+        }
+
+        StartCoroutine(HitStopRoutine());
         StartCoroutine(InvulnerabilityRoutine());
         ApplyAreaKnockback();
     }
 
+    private IEnumerator HitStopRoutine()
+    {
+        Time.timeScale = 0f;
+        yield return new WaitForSecondsRealtime(hitStopDuration);
+        Time.timeScale = 1f;
+    }
+
+    private IEnumerator InvulnerabilityRoutine()
+    {
+        isInvulnerable = true;
+        
+        float flashInterval = iFrameDuration / (numberOfFlashes * 2);
+
+        for (int i = 0; i < numberOfFlashes; i++)
+        {
+            spriteRenderer.material = flashMaterial;
+            yield return new WaitForSeconds(flashInterval);
+            
+            spriteRenderer.material = originalMaterial;
+            yield return new WaitForSeconds(flashInterval);
+        }
+
+        spriteRenderer.material = originalMaterial;
+        isInvulnerable = false;
+    }
+
+    private void ApplyAreaKnockback()
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, knockbackRadius);
+        foreach (Collider2D target in colliders)
+        {
+            if (target.CompareTag("Enemy"))
+            {
+                EnemyAI enemyAI = target.GetComponent<EnemyAI>();
+                if (enemyAI != null)
+                {
+                    Vector2 direction = (target.transform.position - transform.position).normalized;
+                    enemyAI.ApplyKnockback(direction, knockbackForce);
+                }
+            }
+        }
+    }
+    
     public void Heal(int amount)
     {
         stats.currentHealth += amount;
-        if (stats.currentHealth > stats.maxHealth)
+        if(stats.currentHealth > stats.maxHealth) stats.currentHealth = stats.maxHealth;
+        
+        // Atualiza a UI ao curar também!
+        if (healthBar != null)
         {
-            stats.currentHealth = stats.maxHealth;
+            healthBar.Heal(amount);
         }
     }
 
@@ -47,61 +129,9 @@ public class PlayerHealth : MonoBehaviour
     {
         gameOverScreen.SetActive(true);
         Time.timeScale = 0;
-        gameObject.SetActive(false);
+        Destroy(gameObject);
     }
-
-    // --- Novas Funcionalidades ---
-
-    private void ApplyAreaKnockback()
-    {
-        // Busca colisores na área (raio configurável)
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, knockbackRadius);
-
-        foreach (Collider2D target in colliders)
-        {
-            if (target.CompareTag("Enemy"))
-            {
-                // Em vez de pegar o Rigidbody, pegamos o script de inteligência do inimigo
-                EnemyAI enemyAI = target.GetComponent<EnemyAI>();
-
-                if (enemyAI != null)
-                {
-                    // Calcula direção: Do Player PARA o Inimigo
-                    Vector2 direction = (target.transform.position - transform.position).normalized;
-
-                    // Chama a função que já existe no seu inimigo!
-                    // Ela vai pausar o movimento dele e aplicar a força corretamente.
-                    enemyAI.ApplyKnockback(direction, knockbackForce);
-                }
-            }
-        }
-    }
-
-    private IEnumerator InvulnerabilityRoutine()
-    {
-        isInvulnerable = true;
-
-        // Salva a cor original (geralmente branca)
-        Color originalColor = spriteRenderer.color;
-        // Cria a cor transparente
-        Color flashColor = new Color(originalColor.r, originalColor.g, originalColor.b, 0.5f);
-
-        // Loop para piscar
-        for (int i = 0; i < numberOfFlashes; i++)
-        {
-            spriteRenderer.color = flashColor;
-            yield return new WaitForSeconds(iFrameDuration / (numberOfFlashes * 2));
-
-            spriteRenderer.color = originalColor;
-            yield return new WaitForSeconds(iFrameDuration / (numberOfFlashes * 2));
-        }
-
-        // Garante que a cor voltou ao normal e desliga a imunidade
-        spriteRenderer.color = originalColor;
-        isInvulnerable = false;
-    }
-
-    // Função visual para você ver o tamanho do knockback na Scene do Editor
+    
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;

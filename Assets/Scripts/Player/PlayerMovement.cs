@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -9,19 +8,28 @@ public class PlayerMovement : MonoBehaviour
     private PlayerStats stats;
     private Animator animator;
     private Rigidbody2D rb;
-    private Vector2 moveInput;
     private InputActions controls;
     private SpriteRenderer spriteRenderer;
 
     private Vector2 targetPosition;
-    private Vector2 normalizedDirection;
-
+    
+    // Marcador visual
     public GameObject targetMarker;
-    private Coroutine activeMarkerCoroutine;
-    [SerializeField] private float markerStopDistance;
 
+    [Header("Configurações de Movimento")]
+    [Tooltip("Velocidade máxima que o player pode atingir (sobrescreve stats se quiser)")]
+    public float terminalVelocity = 5f; 
 
-    // Awake sempre para inicialização de variaveis proprias
+    [Tooltip("Distância do alvo onde o player começa a frear automaticamente")]
+    public float slowingRadius = 1.5f; 
+
+    [Tooltip("Distância mínima para considerar que 'chegou'")]
+    public float stopDistance = 0.1f;
+
+    [Header("Inércia")]
+    public float acceleration = 40f; 
+    public float deceleration = 40f; // Ajuste para ser menor se quiser mais "slide"
+
     void Awake()
     {
         controls = new InputActions();
@@ -30,21 +38,38 @@ public class PlayerMovement : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         stats = GetComponent<PlayerStats>();
         
-        targetPosition = transform.position;
+        // Inicializa a velocidade terminal com o valor do stats, mas você pode mudar no Inspector
+        terminalVelocity = stats.moveSpeed;
+        targetPosition = rb.position; // Começa com alvo na posição atual para não andar sozinho
     }
 
     private void OnEnable()
     {
         controls.PlayerControls.Enable();
-        controls.PlayerControls.Walk.performed += HandleWalkClick;
     }
     private void OnDisable()
     {
         controls.PlayerControls.Disable();
-        controls.PlayerControls.Walk.performed -= HandleWalkClick;
     }
 
-    private void HandleWalkClick(InputAction.CallbackContext context)
+    void Update()
+    {
+        CheckInput();
+        UpdateMarkerState();
+        UpdateAnimator();
+        FlipSprite();
+    }
+
+    private void CheckInput()
+    {
+        // Enquanto segura o botão, atualiza o alvo
+        if (controls.PlayerControls.Walk.IsPressed())
+        {
+            SetTargetPosition();
+        }
+    }
+
+    private void SetTargetPosition()
     {
         Vector2 screenPosition = Input.mousePosition;
         Vector2 worldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
@@ -53,64 +78,79 @@ public class PlayerMovement : MonoBehaviour
         if (hitInfo.collider != null)
         {
             targetPosition = hitInfo.point;
-            activeMarkerCoroutine = StartCoroutine(ShowMarker());
         }
     }
-    
-    IEnumerator ShowMarker()
+
+    private void UpdateMarkerState()
     {
-        targetMarker.transform.position = targetPosition;
-        targetMarker.gameObject.SetActive(true);
-
-        while(Vector2.Distance(transform.position, targetMarker.transform.position) >0.3)
+        // Só mostra o marcador se estivermos longe do alvo
+        float distance = Vector2.Distance(targetPosition, transform.position);
+        
+        if (distance > stopDistance)
         {
-            yield return null;
-        }
-        targetMarker.gameObject.SetActive(false);
-        activeMarkerCoroutine = null;
-    }
-
-    void Update()
-    {
-        //deixar codigo inativo para possivel adaptação para controle futuramente
-        //moveInput = controls.PlayerControls.Move.ReadValue<Vector2>();
-
-        if (Vector2.Distance(targetPosition, (Vector2)transform.position) >0.2)
-        {
-            Vector2 direction = targetPosition - (Vector2)transform.position;
-
-            normalizedDirection = direction.normalized;
+            targetMarker.transform.position = targetPosition;
+            if (!targetMarker.activeSelf) targetMarker.SetActive(true);
         }
         else
         {
-            normalizedDirection = Vector2.zero;
+            if (targetMarker.activeSelf) targetMarker.SetActive(false);
         }
-
-        UpdateAnimator();
-        FlipSprite();
     }
 
     private void FlipSprite()
     {
-        if(normalizedDirection.x < 0)
+        // Vira o sprite baseado na velocidade real
+        if (Mathf.Abs(rb.linearVelocity.x) > 0.1f)
         {
-            spriteRenderer.flipX = true;
-        }else if(normalizedDirection.x >0)
-        {
-            spriteRenderer.flipX=false;
+            spriteRenderer.flipX = rb.linearVelocity.x < 0;
         }
     }
 
     private void UpdateAnimator()
     {
-        animator.SetFloat("Speed", normalizedDirection.magnitude);
-        //altera a variavel speed dentro do animator com base na magnitude do moveinput, caso o player gere qualquer movimentação no personagem, a magnitude será maior que zero, e dentro do animator, a animação de andar precisa apenas q speed seja maior q 0.1
+        // Passa a velocidade real para a animação
+        animator.SetFloat("Speed", rb.linearVelocity.magnitude);
     }
 
     void FixedUpdate()
     {
-        rb.linearVelocity = normalizedDirection * stats.moveSpeed;
-        //rb.linearVelocity = new Vector2(moveInput.x * speed * Time.deltaTime, moveInput.y * speed * Time.deltaTime);
-    }
+        // 1. Calcular vetor para o alvo
+        Vector2 directionToTarget = targetPosition - rb.position;
+        float distance = directionToTarget.magnitude;
 
+        // 2. Calcular a Velocidade Desejada (Arrival Logic)
+        Vector2 desiredVelocity = Vector2.zero;
+
+        if (distance > stopDistance)
+        {
+            // Normaliza a direção
+            Vector2 directionNormalized = directionToTarget.normalized;
+
+            // Lógica de Chegada Suave:
+            // Se estiver dentro do raio de frenagem, a velocidade é proporcional à distância
+            if (distance < slowingRadius)
+            {
+                // Regra de 3: Quanto mais perto, menor a velocidade desejada
+                float rampedSpeed = terminalVelocity * (distance / slowingRadius);
+                desiredVelocity = directionNormalized * rampedSpeed;
+            }
+            else
+            {
+                // Longe do raio de frenagem: Velocidade Máxima
+                desiredVelocity = directionNormalized * terminalVelocity;
+            }
+        }
+        else
+        {
+            // Chegou no destino (ou muito perto)
+            desiredVelocity = Vector2.zero;
+        }
+
+        // 3. Aplicar Inércia (MoveTowards)
+        // Escolhe taxa de aceleração ou desaceleração dependendo se queremos aumentar ou diminuir a velocidade
+        bool isAccelerating = desiredVelocity.magnitude > rb.linearVelocity.magnitude;
+        float currentRate = isAccelerating ? acceleration : deceleration;
+
+        rb.linearVelocity = Vector2.MoveTowards(rb.linearVelocity, desiredVelocity, currentRate * Time.fixedDeltaTime);
+    }
 }
