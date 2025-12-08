@@ -121,10 +121,20 @@ public class SkillQueueManager : MonoBehaviour
             case SkillBehaviorType.groundArea:
                 CastGroundArea(skill);
                 break;
+            case SkillBehaviorType.selfBuff: // <--- NOVO CASE
+                CastBuff(skill);
+                break;
                 
         }
     }
 
+    private void CastBuff(SkillData skill)
+    {
+        if (playerStats != null)
+        {
+            playerStats.ActivateLightBuff(skill.buffDuration, skill.moveSpeedMultiplier, skill.effectPrefab);
+        }
+    }
     private void CastOrbiting(SkillData skill)
     {
         Instantiate(skill.effectPrefab, transform.position, Quaternion.identity, this.transform);

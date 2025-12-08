@@ -2893,6 +2893,7 @@ MonoBehaviour:
   moveSpeed: 3
   globalDamageMultiplier: 1
   cooldownReductionMultiplier: 1
+  isShielded: 0
 --- !u!114 &506964560
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2919,6 +2920,7 @@ MonoBehaviour:
   - data: {fileID: 0}
     currentCharges: 0
     lastUsedTime: 0
+  waterSkillOffset: 1
   natureSpawnRadius: 2
   natureSpawnNumber: 3
 --- !u!1 &507796328
