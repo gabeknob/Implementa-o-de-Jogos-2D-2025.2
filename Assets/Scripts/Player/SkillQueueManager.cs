@@ -4,19 +4,20 @@ using UnityEngine.InputSystem;
 
 public class SkillQueueManager : MonoBehaviour
 {
+    //Helpers variable
+    Vector2 worldPosition;
     [Header("Configuração Inicial")]
     public SkillData startingSkill; 
 
-    // Lista visível no Inspector graças à classe Serializable abaixo
     public SkillState[] activeSlots = new SkillState[4]; 
     
-    // Fila interna (não aparece no inspector nativamente)
     public Queue<SkillState> waitingQueue = new Queue<SkillState>(); 
 
     private InputActions controls;
     private PlayerStats playerStats; // Se precisar de dano depois
 
-    [Header("Configurações de Spawn")]
+    [Header("Configurações das skills")]
+    public float waterSkillOffset = 1f;
     public float natureSpawnRadius = 2f;
     public int natureSpawnNumber = 3; // <--- Importante estar > 0
 
@@ -106,10 +107,58 @@ public class SkillQueueManager : MonoBehaviour
             case SkillBehaviorType.summonMinion:
                 CastSummon(skill);
                 break;
+            case SkillBehaviorType.chain:
+                CastChainLightning(skill);
+                break;
+            case SkillBehaviorType.aoe:
+                CastAOE(skill);
+                break;
+
+            case SkillBehaviorType.orbiting:
+                CastOrbiting(skill);
+                break;
+
+            case SkillBehaviorType.groundArea:
+                CastGroundArea(skill);
+                break;
                 
         }
     }
 
+    private void CastOrbiting(SkillData skill)
+    {
+        Instantiate(skill.effectPrefab, transform.position, Quaternion.identity, this.transform);
+    }
+    private void CastGroundArea(SkillData skill)
+    {
+        Instantiate(skill.effectPrefab, (Vector2)MousePosition(), Quaternion.identity);
+    }
+    private void CastAOE(SkillData skill)
+    {
+        Vector2 direction = (Vector2)MousePosition() - (Vector2)transform.position;
+        Vector2 directionNormalized = direction.normalized;
+        Vector2 spawnPosition = (Vector2)transform.position + (directionNormalized * waterSkillOffset);
+
+        //para que o projetil fique direcionado à posição do mouse
+        float angle = Mathf.Atan2(directionNormalized.y, directionNormalized.x) * Mathf.Rad2Deg;
+        Quaternion rotation = Quaternion.Euler(0f, 0f, angle - 15f);
+
+        GameObject splash = Instantiate(skill.effectPrefab, spawnPosition, rotation);
+        splash.transform.SetParent(this.transform);
+    }
+    private void CastChainLightning(SkillData skill)
+    {
+        Vector2 mousePos = MousePosition();
+        
+        GameObject lightningObj = Instantiate(skill.effectPrefab, transform.position, Quaternion.identity);
+        
+        ChainLightningBehavior script = lightningObj.GetComponent<ChainLightningBehavior>();
+        if (script != null)
+        {
+            int finalDamage = Mathf.RoundToInt(skill.damage * playerStats.globalDamageMultiplier);
+            script.Setup(finalDamage, skill.bounceCount, skill.bounceRange, transform.position);
+        }
+    }
     private void CastProjectile(SkillData skill)
     {
         if (skill.effectPrefab == null) return;
@@ -182,6 +231,8 @@ public class SkillQueueManager : MonoBehaviour
         return false;
     }
 
+    //-----------Helpers------------
+
     private void RotateSkill(int slotIndex)
     {
         SkillState oldSkill = activeSlots[slotIndex];
@@ -198,21 +249,14 @@ public class SkillQueueManager : MonoBehaviour
             Debug.Log("Sem rotação disponível (recarregado).");
         }
     }
-}
-
-
-[System.Serializable]
-public class SkillState
-{
-    public SkillData data;
-    public int currentCharges;
-    public float lastUsedTime;
-
-    public SkillState(SkillData data)
+    
+    private Vector2 MousePosition()
     {
-        this.data = data;
-        this.currentCharges = data.maxCharges;
-        this.lastUsedTime = -100f;
+        Vector2 screenPosition = Input.mousePosition;
+        worldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
+        return worldPosition;
     }
-    public void ResetCharges() { if(data) currentCharges = data.maxCharges; }
 }
+
+
+
