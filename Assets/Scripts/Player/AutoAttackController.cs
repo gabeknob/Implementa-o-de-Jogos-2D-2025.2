@@ -25,16 +25,23 @@ public class AutoAttackController : MonoBehaviour
         while (isShooting)
         {
             float closestDistance = float.PositiveInfinity;
-            EnemyAI closestEnemy = null;
+        EnemyAI closestEnemy = null;
+
+        // Adicione verificação de null aqui
+        if(EnemyManager.allEnemies != null) 
+        {
             foreach (var enemy in EnemyManager.allEnemies)
             {
+                if (enemy == null) continue; // Pula inimigos mortos que ainda estão na lista
+
                 float enemyDistance = Vector2.Distance(this.gameObject.transform.position, enemy.transform.position);
                 if(enemyDistance < closestDistance)
                 {
                     closestDistance = enemyDistance;
-                    closestEnemy = enemy.GetComponent<EnemyAI>();
+                    closestEnemy = enemy; // Já é EnemyAI, não precisa de GetComponent novamente
                 }
             }
+        }
             
             if(closestEnemy != null && closestDistance<8f)
             {
