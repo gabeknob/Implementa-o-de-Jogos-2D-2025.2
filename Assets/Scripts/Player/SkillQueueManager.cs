@@ -14,7 +14,7 @@ public class SkillQueueManager : MonoBehaviour
     public Queue<SkillState> waitingQueue = new Queue<SkillState>(); 
 
     private InputActions controls;
-    private PlayerStats playerStats; // Se precisar de dano depois
+    private PlayerStats playerStats; 
 
     [Header("Configurações das skills")]
     public float waterSkillOffset = 1f;
@@ -121,13 +121,35 @@ public class SkillQueueManager : MonoBehaviour
             case SkillBehaviorType.groundArea:
                 CastGroundArea(skill);
                 break;
-            case SkillBehaviorType.selfBuff: // <--- NOVO CASE
+            case SkillBehaviorType.selfBuff:
                 CastBuff(skill);
                 break;
-                
+            case SkillBehaviorType.blackHole:
+                CastBlackHole(skill);
+                break;
         }
     }
+    private void CastBlackHole(SkillData skill)
+    {
+        if (skill.effectPrefab == null) return;
 
+        GameObject blackHole = Instantiate(skill.effectPrefab, MousePosition(), Quaternion.identity);
+
+        BlackHoleSkill script = blackHole.GetComponent<BlackHoleSkill>();
+        if (script != null)
+        {
+            // Calcula dano (se houver)
+            int finalDamage = Mathf.RoundToInt(skill.damage * playerStats.globalDamageMultiplier);
+
+            // AQUI USAMOS A SUA VARIÁVEL "durationOnGround"
+            script.Setup(
+                skill.durationOnGround, 
+                skill.pullForce, 
+                skill.pullRadius,
+                finalDamage
+            );
+        }
+    }
     private void CastBuff(SkillData skill)
     {
         if (playerStats != null)
