@@ -50,13 +50,9 @@ public class PlayerHealth : MonoBehaviour
     {
         if (isInvulnerable) return;
 
-        stats.currentHealth -= damage;
-        
-        // --- ATUALIZAÇÃO DA UI ---
-        if (healthBar != null)
+        if (stats != null)
         {
-            healthBar.TakeDamage(damage); // Usa o método da própria barra para animar
-            // OU: healthBar.SetHealth(stats.currentHealth); // Se preferir setar direto
+            stats.ModifyHealth(-damage);
         }
 
         if (stats.currentHealth <= 0)
@@ -65,6 +61,7 @@ public class PlayerHealth : MonoBehaviour
             return;
         }
 
+        //Efeitos de Impacto
         StartCoroutine(HitStopRoutine());
         StartCoroutine(InvulnerabilityRoutine());
         ApplyAreaKnockback();

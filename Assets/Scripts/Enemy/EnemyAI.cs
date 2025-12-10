@@ -32,8 +32,20 @@ public class EnemyAI : MonoBehaviour
         target = player.transform;
 
         //adicionando o inimigo no array de inimigos no mapa para definir qual inimigo será alvo do player
+        
+    }
+    void OnEnable()
+    {
         EnemyManager.allEnemies.Add(this);
     }
+    void OnDisable()
+{
+    // Remove este inimigo da lista global quando ele morre/desativado
+    if (EnemyManager.allEnemies != null)
+    {
+        EnemyManager.allEnemies.Remove(this);
+    }
+}
     void Update()
     {
         if (target != null)
@@ -90,7 +102,6 @@ public class EnemyAI : MonoBehaviour
     //a função OnDestroy é chamada em todos os scripts de objetos quando são destruidos, como o script enemyHealth destroi o inimigo qnd a vida chega a zero, o script EnemyAI dele vai chamar a função OnDestroy abaixo, que vai tirar ele do array de inimigos no mapa
     private void OnDestroy()
     {
-        EnemyManager.allEnemies.Remove(this);
         var playerExp = player.GetComponent<PlayerExp>();
         if (playerExp != null)
         {

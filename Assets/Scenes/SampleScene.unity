@@ -2901,6 +2901,8 @@ MonoBehaviour:
   moveSpeed: 3
   globalDamageMultiplier: 1
   cooldownReductionMultiplier: 1
+  isShielded: 0
+  shieldReduction: 0.8
 --- !u!114 &506964560
 MonoBehaviour:
   m_ObjectHideFlags: 0
