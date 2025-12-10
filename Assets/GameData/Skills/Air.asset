@@ -20,4 +20,9 @@ MonoBehaviour:
   damage: 0
   bounceCount: 0
   bounceRange: 0
+  buffDuration: 0
+  moveSpeedMultiplier: 0
+  durationOnGround: 0
+  pullForce: 0
+  pullRadius: 0
   behaviorType: 1
