@@ -16,7 +16,7 @@ MonoBehaviour:
   effectPrefab: {fileID: 8685451268581175789, guid: 1267167579901824095d206715df207d, type: 3}
   cooldown: 1
   maxCharges: 5
-  icon: {fileID: 4017063373586681273, guid: 27e2bb98335a11f42abc432c2f0423e7, type: 3}
+  icon: {fileID: -4685331947202777330, guid: 856c3dd70928357498b1bbb8c5ff3dd3, type: 3}
   damage: 10
   bounceCount: 0
   bounceRange: 0
