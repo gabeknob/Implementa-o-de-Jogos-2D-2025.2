@@ -8,18 +8,18 @@ public class AutoAttackController : MonoBehaviour
 {
     [SerializeField] private GameObject projectile;
     [SerializeField] private bool isShooting = true;
-    public float coolDownShoot;
+    private PlayerStats playerStats;
     public Vector2 directionNormalized;
-    public int attackDamage;
-    public float attackSpeed;
+
     void Start()
     {
         StartCoroutine(FireRoutine());
     }
-    void Update() 
+    void Awake()
     {
-        
+        playerStats = GetComponent<PlayerStats>();
     }
+
     IEnumerator FireRoutine()
     {
         while (isShooting)
@@ -52,13 +52,13 @@ public class AutoAttackController : MonoBehaviour
                 
                 newProjectile.GetComponent<ProjectileMovement>().Setup(
                     directionNormalized, 
-                    attackSpeed, 
-                    attackDamage, 
+                    playerStats.projectileSpeed,
+                    playerStats.damage, 
                     0, 
                     0f
                 );
             }
-            yield return new WaitForSeconds(coolDownShoot);
+            yield return new WaitForSeconds(playerStats.attackSpeed);
         }
     }
 }

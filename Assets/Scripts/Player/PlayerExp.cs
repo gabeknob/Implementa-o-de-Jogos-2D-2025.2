@@ -2,12 +2,23 @@ using UnityEngine;
 
 public class PlayerExp : MonoBehaviour
 {
+    [Header("UI References")]
+    public GameObject upgradeCanvasUI;
+    public GameObject skillLearnUI;
+
     [Header("Variáveis de Nível")]
     public float xpToLevelUp;
     public float currentXp;
     public int level;
     public float xpMultiplierIncrease;
     public UpgradeManager upgradeManager;
+    public UpgradeManagerStats upgradeManagerStats;
+
+    private void Start()
+    {
+        if (upgradeCanvasUI != null) upgradeCanvasUI.SetActive(false);
+        if (skillLearnUI != null) skillLearnUI.SetActive(false);
+    }
 
     void Awake()
     {
@@ -32,6 +43,23 @@ public class PlayerExp : MonoBehaviour
 
     public void HandleLevelUp()
     {
-        if(upgradeManager!=null) upgradeManager.OpenUpgradeMenu();
+        if (upgradeManager != null) {
+
+            // Regra: Nível PAR (2, 4, 6...) E Menor ou igual a 14
+            bool isSkillLevel = (level % 2 == 0) && (level <= 14);
+
+            if (isSkillLevel)
+            {
+                if (skillLearnUI) skillLearnUI.SetActive(true);
+                if (upgradeCanvasUI) upgradeCanvasUI.SetActive(false);
+                upgradeManager.OpenUpgradeMenu();
+            }
+            else
+            {
+                upgradeManagerStats.OnPlayerLevelUp(level);
+            }
+
+            Time.timeScale = 0f;
+        }
     }
 }

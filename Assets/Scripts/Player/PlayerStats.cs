@@ -14,7 +14,10 @@ public class PlayerStats : MonoBehaviour
     public float moveSpeed;
 
     [Header("Atributos de Combate")]
-    public float globalDamageMultiplier;
+    public int damage;
+    public int damageMultiplier;
+    public float projectileSpeed;
+    public float attackSpeed;
     public float cooldownReductionMultiplier;
     public int criticalChance;
     public float criticalMultiplier;
@@ -130,8 +133,8 @@ public class PlayerStats : MonoBehaviour
 
     public void UpgradeDamage(float percentage)
     {
-        globalDamageMultiplier += percentage;
-        Debug.Log("Dano Multiplicado! Novo: " + globalDamageMultiplier);
+        damage += (int)percentage;
+        Debug.Log("Dano Multiplicado! Novo: " + damage);
     }
     public void UpgradeCooldown(float percentage)
     {

@@ -6,6 +6,8 @@ public class SkillQueueManager : MonoBehaviour
 {
     //Helpers variable
     Vector2 worldPosition;
+    [SerializeField] private Animator animator;
+
     [Header("Configuração Inicial")]
     public SkillData startingSkill; 
 
@@ -14,7 +16,8 @@ public class SkillQueueManager : MonoBehaviour
     public Queue<SkillState> waitingQueue = new Queue<SkillState>(); 
 
     private InputActions controls;
-    private PlayerStats playerStats; 
+    private PlayerStats playerStats;
+    private static readonly int Attack = Animator.StringToHash("attack");
 
     [Header("Configurações das skills")]
     public float waterSkillOffset = 1f;
@@ -33,6 +36,11 @@ public class SkillQueueManager : MonoBehaviour
         if (startingSkill != null)
         {
             LearnNewSkill(startingSkill);
+        }
+
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
         }
     }
 
@@ -97,6 +105,9 @@ public class SkillQueueManager : MonoBehaviour
 
     private void CastSkill(SkillData skill)
     {
+        animator.SetTrigger(Attack);
+        Debug.Log(Attack);
+
         switch (skill.behaviorType)
         {
             case SkillBehaviorType.projectile:
@@ -139,7 +150,7 @@ public class SkillQueueManager : MonoBehaviour
         if (script != null)
         {
             // Calcula dano (se houver)
-            int finalDamage = Mathf.RoundToInt(skill.damage * playerStats.globalDamageMultiplier);
+            int finalDamage = Mathf.RoundToInt(skill.damage * playerStats.damage);
 
             // AQUI USAMOS A SUA VARIÁVEL "durationOnGround"
             script.Setup(
@@ -187,7 +198,7 @@ public class SkillQueueManager : MonoBehaviour
         ChainLightningBehavior script = lightningObj.GetComponent<ChainLightningBehavior>();
         if (script != null)
         {
-            int finalDamage = Mathf.RoundToInt(skill.damage * playerStats.globalDamageMultiplier);
+            int finalDamage = Mathf.RoundToInt(skill.damage * playerStats.damage);
             script.Setup(finalDamage, skill.bounceCount, skill.bounceRange, transform.position);
         }
     }
