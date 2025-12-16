@@ -141,7 +141,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e520ea63bfea6744ab1a2207c0c3a98a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillSlotUI
-  skillIcon: {fileID: 255848229}
+  skillIcon: {fileID: 728644977}
   cooldownOverlay: {fileID: 1052103040}
   chargesText: {fileID: 1555361972}
   cooldownText: {fileID: 746738936}
@@ -3111,7 +3111,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 51
-  m_Sprite: {fileID: -5908238798454654921, guid: e39316f0db4e3e94a922f0fc12df664c, type: 3}
+  m_Sprite: {fileID: -5908238798454654921, guid: 08b9f011dbc1b7244b026a7dbe05b3a8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -3131,8 +3131,8 @@ Transform:
   m_GameObject: {fileID: 506964548}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 1}
+  m_LocalPosition: {x: 2.18, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 320726235}
@@ -3195,7 +3195,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.19, y: 0.21}
+    oldSize: {x: 1.1875, y: 1.4375}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
