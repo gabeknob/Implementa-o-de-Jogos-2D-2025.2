@@ -1791,7 +1791,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamageOverTimeArea
   damagePerTick: 20
-  timeBetweenTicks: 0.1
+  timeBetweenTicks: 0.5
   duration: 5
 --- !u!1 &8735207985461374694
 GameObject:
