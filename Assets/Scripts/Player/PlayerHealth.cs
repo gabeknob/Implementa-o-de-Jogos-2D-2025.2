@@ -7,6 +7,9 @@ public class PlayerHealth : MonoBehaviour
     private PlayerStats stats;
     private SpriteRenderer spriteRenderer;
     public GameObject gameOverScreen;
+    [Header("Audio")]
+    public AudioSource soundtrack;
+    public AudioClip deathAudio;
     
     [Header("Interface (UI)")]
     public HealthBar healthBar; // <--- ARRASTE A BARRA DE VIDA AQUI NO INSPECTOR
@@ -141,13 +144,14 @@ public class PlayerHealth : MonoBehaviour
     {
         if(animator != null)
         {
+            soundtrack.Stop();
+            SoundEffectsManager.Instance.PlaySFXClip(deathAudio, transform, 0.3f);
             animator.SetTrigger("Die");
             animator.speed = 1f / deathTimeScale; 
         }
         
         Time.timeScale = deathTimeScale; 
 
-        // Efeito Visual (Escurecer tudo menos a bruxa)
         if(deathDimmer != null)
         {
             deathDimmer.SetActive(true);

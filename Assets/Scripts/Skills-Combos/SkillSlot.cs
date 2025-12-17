@@ -1,12 +1,6 @@
-using System.Reflection;
 using TMPro;
-using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using static UnityEditor.PlayerSettings;
-using static UnityEditor.Searcher.SearcherWindow;
 
 public class SkillSlot : MonoBehaviour
 {
